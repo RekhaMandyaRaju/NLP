@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="jquery-1.11.2.min.js"></script>
+</head>
+	<script>	    
+		$(document).ready(function(){
+			moodmap = [];
+			counter = 0;
+			writeToDb = {};
+			fetchMoodsAndSongs();			
+		});
+	</script>
+	<script>
+		function fetchMoodsAndSongs(){
+			$.get("http://developer.echonest.com/api/v4/artist/list_terms?api_key=SKU68DJYXIFKLX3RE&format=json&type=mood" , function( data ) {				
+				for( j=0; j<data.response.terms.length; j++){
+					moodmap.push(data.response.terms[j].name)
+				}
+				fetchSongs();
+			});
+		}
+	</script>
+	<script>
+		function fetchSongs(){
+			if (counter == moodmap.length){
+				fillDb();
+				return
+			}
+			api = "http://developer.echonest.com/api/v4/song/search?api_key=SKU68DJYXIFKLX3RE&results=100&format=json&mood="+moodmap[counter];
+			$.get(api, function( data ) {
+			    console.log("-----------------------------------------------"+moodmap[counter]+"---------------------------------------------------------------");
+				console.log(data);
+				writeToDb[moodmap[counter]] = data;
+				counter++;
+				fetchSongs();
+			});
+		}
+	</script>
+	<script>
+		function fillDb(){
+			var obj = {data:writeToDb}
+			$.post("download.php",obj,dataPosted,type="json");
+		}
+	</script>
+	<script>
+		function dataPosted(data){
+			alert("success ------- "+data.msg);
+		}
+	</script>
+	
+<body>
+</body>
+</html>
